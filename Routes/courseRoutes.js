@@ -1,23 +1,73 @@
 const express = require("express");
-const {
-    createCourse,
-    updateCourse,
-    getCourse,
-    searchCourses,
-} = require("../controllers/courseController");
+const { Course } = require("./models");
+const app = express();
+app.use(express.json());
 
-const router = express.Router();
+app.post("/api/courses", async (req, res) => {
+    const { courseId, title, description, category, difficultyLevel, createdBy } = req.body;
 
-// Create a course
-router.post("/", createCourse);
+    try {
+        const course = new Course({ courseId, title, description, category, difficultyLevel, createdBy });
+        await course.save();
+        res.status(201).json(course);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
 
-// Update a course
-router.put("/:courseId", updateCourse);
+const { Module } = require("./models");
 
-// Get a specific course
-router.get("/:courseId", getCourse);
+app.post("/api/modules", async (req, res) => {
+    const { moduleId, courseId, title, content, hierarchyOrder } = req.body;
 
-// Search courses
-router.get("/search", searchCourses);
+    try {
+        const module = new Module({ moduleId, courseId, title, content, hierarchyOrder });
+        await module.save();
+        res.status(201).json(module);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
 
-module.exports = router;
+const { VersionHistory } = require("./models");
+
+app.put("/api/modules/:id", async (req, res) => {
+    const { id } = req.params;
+    const { title, content } = req.body;
+
+    try {
+        const module = await Module.findById(id);
+        if (!module) return res.status(404).json({ error: "Module not found" });
+
+        // Save version history
+        const version = (await VersionHistory.countDocuments({ moduleId: id })) + 1;
+        const versionHistory = new VersionHistory({ moduleId: id, version, content: module.content });
+        await versionHistory.save();
+
+        // Update the module
+        module.title = title || module.title;
+        module.content = content || module.content;
+        module.updatedAt = new Date();
+        await module.save();
+
+        res.json(module);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
+app.get("/api/search/courses", async (req, res) => {
+    const { q } = req.query;
+
+    try {
+        const courses = await Course.find({
+            $or: [
+                { title: { $regex: q, $options: "i" } },
+                { description: { $regex: q, $options: "i" } }
+            ],
+        });
+        res.json(courses);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
