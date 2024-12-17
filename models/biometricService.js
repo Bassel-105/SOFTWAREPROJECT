@@ -1,4 +1,3 @@
-// biometricService.js
 const { getUserBiometricData } = require('./models/User');
 
 async function verifyBiometricData(username, capturedImage) {

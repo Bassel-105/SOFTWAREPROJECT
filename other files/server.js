@@ -1,5 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const { verifyBiometricData } = require('./biometricService');
 require("dotenv").config(); // Load environment variables from .env file
 
 const app = express();
@@ -12,14 +13,7 @@ mongoose
     .then(() => console.log("Connected to MongoDB"))
     .catch((err) => console.error("MongoDB connection error:", err));
 
-// server.js
 
-const express = require('express');
-const bodyParser = require('body-parser');
-const { verifyBiometricData } = require('./biometricService'); // Biometric verification logic
-
-const app = express();
-app.use(bodyParser.json());
 
 // Login route - Capture biometric after login credentials
 app.post('/login', async (req, res) => {
