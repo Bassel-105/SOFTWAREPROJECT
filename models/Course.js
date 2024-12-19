@@ -8,10 +8,14 @@ const courseSchema = new mongoose.Schema({
     difficultyLevel: { type: String, enum: ["Beginner", "Intermediate", "Advanced"] },
     createdBy: { type: String, required: true },
     createdAt: { type: Date, default: Date.now },
+    enrolledStudents: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],  // Revert back to ObjectId references
 });
 
 const Course = mongoose.model("Course", courseSchema);
 module.exports = Course;
+
+
+
 
 mongoose
     .connect("mongodb://localhost:27017/DB1")

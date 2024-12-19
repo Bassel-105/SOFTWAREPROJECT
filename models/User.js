@@ -1,49 +1,63 @@
 const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
+const validator = require("validator");
+const uniqueValidator = require("mongoose-unique-validator");
 
 // Define the schema
 const userSchema = new mongoose.Schema({
-    userId: { type: String, required: true, unique: true },
+    userId: { 
+        type: String, 
+        required: true, 
+        unique: true, 
+        default: function() {
+            return `u${Math.floor(Math.random() * 1000000)}`; // Auto-generate unique userId
+        }
+    },
     name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    passwordHash: { type: String, required: true },
-    role: { type: String, enum: ["student", "instructor", "admin"], required: true },
+    email: {
+        type: String,
+        required: true,
+        unique: true,
+        validate: [validator.isEmail, "Invalid email format"],
+    },
+    password: { 
+        type: String, 
+        required: true, 
+    },
+    role: { 
+        type: String, 
+        enum: ["student", "instructor", "admin"], 
+        required: true 
+    },
     profilePictureUrl: { type: String },
+    biometricData: { // Add biometric data field
+        type: String, 
+        required: false // This can be optional initially
+    },
+    enrolledCourses: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Course' }], // New field for enrolled courses
     createdAt: { type: Date, default: Date.now },
 });
 
-// Export the model
-const User = mongoose.model("User", userSchema);
-module.exports = User;
-
-// Function to create a new user and print attributes
-const createUser = async () => {
-    const newUser = new User({
-        userId: "u12345",
-        name: "Jane Doe",
-        email: "jane.doe@example.com",
-        passwordHash: "hashed_password_here",
-        role: "student",
-        profilePictureUrl: "https://example.com/profile/jane.jpg",
-    });
-
-    try {
-        await newUser.save();
-        console.log("User created successfully!");
-        console.log("User attributes:");
-        console.log("User ID:", newUser.userId);
-        console.log("Name:", newUser.name);
-        console.log("Email:", newUser.email);
-        console.log("Password Hash:", newUser.passwordHash);
-        console.log("Role:", newUser.role);
-        console.log("Profile Picture URL:", newUser.profilePictureUrl);
-        console.log("Created At:", newUser.createdAt);
-    } catch (err) {
-        console.error("Error creating user:", err.message);
+// Hash password before saving to DB
+userSchema.pre("save", async function (next) {
+    if (this.isModified("password")) {
+        this.password = await bcrypt.hash(this.password, 10);
     }
+    next();
+});
+
+// Method to compare passwords
+// Method to compare passwords
+userSchema.methods.comparePassword = async function (candidatePassword) {
+    console.log("Comparing password...");
+    const isMatch = await bcrypt.compare(candidatePassword, this.password);
+    console.log("Password match result:", isMatch);  // Logs if the passwords match or not
+    return isMatch;
 };
 
-// Connect to MongoDB and create the user
-mongoose
-    .connect("mongodb://localhost:27017/DB1")
-    .then(() => console.log("Connected to MongoDB"))
-    .catch((err) => console.error("MongoDB connection error:", err));
+
+// Add unique validation plugin
+userSchema.plugin(uniqueValidator, { message: "{PATH} must be unique." });
+
+// Export the model
+module.exports = mongoose.model("User", userSchema);
