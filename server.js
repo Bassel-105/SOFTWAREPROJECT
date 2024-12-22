@@ -5,8 +5,10 @@ const socketIo = require('socket.io'); // for real-time communication
 require('dotenv').config(); // Load environment variables
 //const Module = require('./models/Module'); // Import the Module mod
  const router = express.Router();
- const notificationsRoutes = require('./routes/notifsystem');
- const chatRoutes = require('./routes/realtimechat');
+ const notificationsRoutes = require('./Routes/notifsystem');
+ const chatRoutes = require('./Routes/realtimechat');
+ const threadsRoutes = require('./Routes/threads');
+const repliesRoutes = require('./Routes/replies');
 
 const app = express();
 
@@ -14,26 +16,15 @@ const app = express();
 app.use(express.json());
 // Use the notifications routes
 app.use('/api', notificationsRoutes);
+app.use('/threads', threadsRoutes);
+app.use('/replies', repliesRoutes);
 
 
 // Middleware
 app.use(express.json());
 // Ensure you can parse JSON data in POST requests
 
-// Import routes
-
-
-app.get('/api/threads', (req, res) => {
-    // logic to handle the GET request
-    res.send("Threads data");
-  });
-
-  router.post('/', (req, res) => {
-    // logic to create a new thread
-    res.json({ message: "Thread created" });
-  });
-
-// Use the routes
+// Import routes// Use the routes
 app.use('/api', chatRoutes);  // Prefix all rout
 
 // MongoDB connection
