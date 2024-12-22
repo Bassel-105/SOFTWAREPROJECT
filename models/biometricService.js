@@ -1,4 +1,8 @@
+<<<<<<< HEAD
+const { getUserBiometricData } = require('./models/User');
+=======
 const User = require('./User'); // Import User model to get biometric data
+>>>>>>> e1c7dad8a4a69f5b5860ac7b2f3e431fb3068d59
 
 async function verifyBiometricData(username, capturedImage) {
     try {
