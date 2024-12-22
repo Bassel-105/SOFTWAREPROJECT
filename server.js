@@ -19,7 +19,6 @@ app.use('/api', notificationsRoutes);
 app.use('/threads', threadsRoutes);
 app.use('/replies', repliesRoutes);
 
-
 // Middleware
 app.use(express.json());
 // Ensure you can parse JSON data in POST requests
