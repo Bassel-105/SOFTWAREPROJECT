@@ -1,12 +1,29 @@
 // src/notes/dto.ts
 
+import { IsNotEmpty, IsString, IsMongoId } from 'class-validator';
+
 export class CreateNoteDto {
-    readonly title: string;
-    readonly content: string;
-    readonly userId: string;  // Assuming each note is linked to a specific user
-  }
-  
-  export class UpdateNoteDto {
-    readonly title?: string;
-    readonly content?: string;
-  }
+  @IsNotEmpty()
+  @IsString()
+  readonly title: string;
+
+  @IsNotEmpty()
+  @IsString()
+  readonly content: string;
+
+  @IsNotEmpty()
+  @IsMongoId()
+  readonly userId: string;
+
+  @IsNotEmpty()
+  @IsMongoId()
+  readonly moduleId: string;
+}
+
+export class UpdateNoteDto {
+  @IsString()
+  readonly title?: string;
+
+  @IsString()
+  readonly content?: string;
+}

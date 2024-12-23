@@ -15,8 +15,8 @@ export class NotesController {
   }
 
   @Get()
-  async findAll(@Query('userId') userId: string): Promise<Note[]> {
-    return this.notesService.findAll(userId);
+  async findAll(@Query('userId') userId: string, @Query('moduleId') moduleId: string): Promise<Note[]> {
+    return this.notesService.findAll(userId, moduleId);
   }
 
   @Put(':id')
