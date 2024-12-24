@@ -1,12 +1,18 @@
-const { getUserBiometricData } = require('./models/User');
-const User = require('./User'); // Import User model to get biometric data
+import { Document, Model } from 'mongoose';
+import User from './User'; // Import User model to get biometric data
 
+// Define the User interface
+interface IUser extends Document {
+    email: string;
+    biometricData: string;
+}
 
-async function verifyBiometricData(username, capturedImage) {
+// Function to verify biometric data
+async function verifyBiometricData(username: string, capturedImage: string): Promise<boolean> {
     try {
         // Retrieve stored biometric data for the user
-        const user = await User.findOne({ email: username });
-        const storedBiometricData = user ? user.biometricData : null;
+        const user: IUser | null = await User.findOne({ email: username }) as IUser | null;
+        const storedBiometricData: string | null = user ? user.biometricData : null;
 
         if (!storedBiometricData) {
             console.log('No biometric data found for this user.');
@@ -17,7 +23,7 @@ async function verifyBiometricData(username, capturedImage) {
         console.log('Captured Biometric Image:', capturedImage);
 
         // Compare captured image with stored biometric data
-        const isMatch = await compareImages(storedBiometricData, capturedImage);
+        const isMatch: boolean = await compareImages(storedBiometricData, capturedImage);
 
         // Return true if biometric data matches
         return isMatch;
@@ -28,15 +34,10 @@ async function verifyBiometricData(username, capturedImage) {
 }
 
 // Placeholder for image comparison logic (can use face-api.js on the server or TensorFlow)
-async function compareImages(storedImage, capturedImage) {
+async function compareImages(storedImage: string, capturedImage: string): Promise<boolean> {
     // Implement actual image comparison logic here (e.g., using face-api.js, TensorFlow)
     // For now, we'll simulate a match (replace this with actual logic)
-    if (storedImage === capturedImage) {
-        return true; // Images match
-    }
-    return false; // Images do not match
+    return storedImage === capturedImage;
 }
 
-module.exports = {
-    verifyBiometricData,
-};
+export { verifyBiometricData };
