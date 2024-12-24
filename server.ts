@@ -12,11 +12,12 @@ import quizRoutes from "./Routes/quizRoutes"; // Import quiz routes
 import { RequestWithUser } from './middlewares/RequestWithUser'; // Make sure this is correctly imported
 import chatRoutes from './Routes/chatRoutes';
 import threadRoutes from './Routes/threadRoutes';
-import notificationRoutes from './Routes/NotificationRoutes';
+import notificationRoutes from './Routes/notificationRoutes';
 import replyRoutes from './Routes/replyRoutes';
 import { getStudentDashboard } from "./Controllers/studentController";
 import { getInstructorAnalytics } from "./Controllers/instructorController";
 import { generateExcelReport } from "./utils/downloadAnalytics"; 
+import userRoutes from "./Routes/userRoutes";
 dotenv.config();
 
 const app = express();
@@ -35,6 +36,7 @@ app.use('/chats', chatRoutes);
 app.use('/threads', threadRoutes);
 app.use('/notifications', notificationRoutes);
 app.use('/replies', replyRoutes);
+app.use("/users", userRoutes);
 
 // Signup route
 app.post("/signup", async (req: Request, res: Response): Promise<any> => {

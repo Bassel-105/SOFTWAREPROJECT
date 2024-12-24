@@ -49,3 +49,82 @@ export const enrollInCourse = async (req: Request<{}, {}, EnrollRequestBody>, re
         }
     }
 };
+export const updateUserProfile = async (req: Request, res: Response) => {
+    const { userId, name, email, profilePictureUrl } = req.body;
+
+    try {
+        const user = await User.findOneAndUpdate(
+            { userId },
+            { name, email, profilePictureUrl },
+            { new: true }
+        );
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.status(200).json({ message: "Profile updated successfully", user });
+    } catch (error) {
+        res.status(500).json({ message: "Error updating profile", error });
+    }
+};
+export const getEnrolledCourses = async (req: Request, res: Response) => {
+    const { userId } = req.query;
+
+    try {
+        const user = await User.findOne({ userId }).populate("enrolledCourses");
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.status(200).json({ enrolledCourses: user.enrolledCourses });
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching enrolled courses", error });
+    }
+};
+export const completeCourse = async (req: Request, res: Response) => {
+    const { userId, courseId, score } = req.body;
+
+    try {
+        const user = await User.findOne({ userId });
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        if (!user.completedCourses.includes(courseId)) {
+            user.completedCourses.push(courseId);
+
+            // Update average score
+            user.averageScore =
+                (user.averageScore * user.completedCourses.length + score) /
+                (user.completedCourses.length + 1);
+
+            await user.save();
+        }
+
+        res.status(200).json({ message: "Course marked as completed", user });
+    } catch (error) {
+        res.status(500).json({ message: "Error completing course", error });
+    }
+};
+export const getUserProgress = async (req: Request, res: Response) => {
+    const { userId } = req.query;
+
+    try {
+        const user = await User.findOne({ userId }).populate("completedCourses");
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.status(200).json({
+            completedCourses: user.completedCourses,
+            averageScore: user.averageScore,
+        });
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching user progress", error });
+    }
+};
+
