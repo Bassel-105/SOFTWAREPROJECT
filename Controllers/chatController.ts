@@ -20,3 +20,17 @@ export const createChat = async (req: Request, res: Response) => {
         res.status(400).json({ error: error.message });
     }
 };
+export const deleteChat = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
+      const chat = await Chat.findByIdAndDelete(id);
+      if (!chat) {
+          res.status(404).json({ error: 'Chat not found' });
+          return;
+      }
+      res.status(200).json({ message: 'Chat deleted successfully', chat });
+  } catch (error: any) {
+      res.status(500).json({ error: 'Error deleting chat: ' + error.message });
+  }
+};

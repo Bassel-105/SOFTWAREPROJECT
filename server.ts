@@ -18,9 +18,16 @@ import { getStudentDashboard } from "./Controllers/studentController";
 import { getInstructorAnalytics } from "./Controllers/instructorController";
 import { generateExcelReport } from "./utils/downloadAnalytics"; 
 import userRoutes from "./Routes/userRoutes";
+import cors from "cors";
 dotenv.config();
 
+
 const app = express();
+
+// Enable CORS for all routes
+app.use(cors({
+  origin: 'http://localhost:3001', // Replace with your frontend URL
+}));
 app.use(express.json()); // Middleware to parse JSON requests
 
 // MongoDB connection
