@@ -9,6 +9,7 @@ app.use(express.json());
 
 // Routes
 app.use("/api/courses", courseRoutes);
+  
 
 // Error handling middleware
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {

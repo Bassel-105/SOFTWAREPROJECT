@@ -19,7 +19,7 @@ const authenticateToken = async (req: Request, res: Response, next: NextFunction
     // Cast req as RequestWithUser to add the `user` property
     (req as RequestWithUser).user = {
       userId: decoded.userId,
-      email: decoded.email,
+      email: decoded.username,
       role: decoded.role,
     };
 

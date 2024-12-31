@@ -19,6 +19,13 @@ import { getInstructorAnalytics } from "./Controllers/instructorController";
 import { generateExcelReport } from "./utils/downloadAnalytics"; 
 import userRoutes from "./Routes/userRoutes";
 import cors from "cors";
+import questionbankRoutes from './Routes/questionbankRoutes';
+import moduleRoutes from './Routes/moduleRoutes';
+import performanceRoutes from "./Routes/performanceRoutes";
+import authRoute from "./Routes/authRoute"
+import adminRoute from "./Routes/adminRoute"
+
+
 dotenv.config();
 
 
@@ -44,7 +51,11 @@ app.use('/threads', threadRoutes);
 app.use('/notifications', notificationRoutes);
 app.use('/replies', replyRoutes);
 app.use("/users", userRoutes);
-
+app.use('/api/question-bank', questionbankRoutes);
+app.use('/api/modules', moduleRoutes);
+app.use('/performance',performanceRoutes)
+app.use('/auth', authRoute);
+app.use('/admin', adminRoute);
 // Signup route
 app.post("/signup", async (req: Request, res: Response): Promise<any> => {
   const { name, email, password, role, biometricImage } = req.body;
@@ -79,9 +90,7 @@ app.post("/signup", async (req: Request, res: Response): Promise<any> => {
 app.get("/student-dashboard/:studentId", authenticateToken, async (req, res) => {
   return getStudentDashboard(req, res);
 });
-app.get("/instructor-analytics/:instructorId", authenticateToken, async (req, res) => {
-  return getInstructorAnalytics(req, res);
-});
+
 app.get("/download-report", authenticateToken, async (_req, res) => {
   const sampleData = [
     { QuestionID: "Q1", Answer: "A", Correct: true },
@@ -95,34 +104,61 @@ app.post("/login", async (req: Request, res: Response): Promise<any> => {
   const { username, password, biometricImage } = req.body;
 
   try {
+    // Find user by email (assuming username is the email)
     const user = await User.findOne({ email: username });
     if (!user) {
+      // Log failed login attempt
+      await FailedLogin.create({
+        username,
+        reason: 'User not found',
+        timestamp: new Date(),
+      });
       return res.status(401).json({ message: "User not found" });
     }
 
+    // Validate password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
+      // Log failed login attempt
+      await FailedLogin.create({
+        username,
+        reason: 'Invalid password',
+        timestamp: new Date(),
+      });
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
+    // Biometric verification (if provided)
     if (biometricImage) {
       const isBiometricVerified = await verifyBiometricData(username, biometricImage);
       if (!isBiometricVerified) {
+        // Log failed login attempt
+        await FailedLogin.create({
+          username,
+          reason: 'Biometric verification failed',
+          timestamp: new Date(),
+        });
         return res.status(401).json({ message: "Biometric verification failed" });
       }
     }
 
+    // Create JWT token
     const token = jwt.sign(
-      { username: user.email, userId: user.userId,role: user.role},
+      { username: user.email, userId: user.userId, role: user.role, Id: user._id, avgScore: user.averageScore, name: user.name },
       process.env.JWT_SECRET || "",
       { expiresIn: "1h" }
     );
 
+    // Send response with the token
     res.status(200).json({ message: "Login successful", token });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: (error as Error).message });
   }
 });
+
+// Assuming FailedLoginAttempt is a model for logging failed login attempts
+const FailedLogin = require('./SOFTWAREPROJECT/models/FailedLogin'); // Adjust the path as needed
+
 
 // Enroll user in a course
 app.post(

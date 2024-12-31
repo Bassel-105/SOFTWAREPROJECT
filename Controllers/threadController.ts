@@ -50,3 +50,20 @@ export const searchThreads = async (req: Request, res: Response): Promise<void> 
     res.status(500).json({ error: 'Error searching threads: ' + error.message });
   }
 };
+// Delete a thread by ID
+export const deleteThread = async (req: Request, res: Response): Promise<any> => {
+  const { id } = req.params; // Get the thread ID from the URL
+
+  try {
+    // Find and delete the thread by ID
+    const thread = await Thread.findByIdAndDelete(id);
+
+    if (!thread) {
+      return res.status(404).json({ error: 'Thread not found' });
+    }
+
+    res.status(200).json({ message: 'Thread deleted successfully' });
+  } catch (error: any) {
+    res.status(500).json({ error: 'Error deleting thread: ' + error.message });
+  }
+};

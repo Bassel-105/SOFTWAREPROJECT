@@ -2,8 +2,11 @@ import express, { Request, Response } from "express";
 import mongoose from "mongoose";
 import Course from "../SOFTWAREPROJECT/models/Course"; // Ensure Course model is correctly imported
 import User from "../SOFTWAREPROJECT/models/User"; // Ensure User model is correctly imported
+import {searchCourses,createCourse,updateCourse} from "../Controllers/courseController"
 
 const router = express.Router();
+
+router.get('/searchKeyword',searchCourses);
 
 // 1. Add a Course (Create)
 router.post("/", async (req: Request, res: Response): Promise<any> => {
@@ -28,6 +31,7 @@ router.get("/", async (req: Request, res: Response): Promise<any> => {
     }
 });
 
+
 // 3. Get Course by courseId (Read One by custom ID)
 router.get("/courseId/:courseId", async (req: Request, res: Response): Promise<any> => {
     try {
@@ -42,38 +46,26 @@ router.get("/courseId/:courseId", async (req: Request, res: Response): Promise<a
     }
 });
 
-// 4. Update Course by courseId
-router.put("/courseId/:courseId", async (req: Request, res: Response): Promise<any> => {
-    try {
-        const updatedCourse = await Course.findOneAndUpdate(
-            { courseId: req.params.courseId },
-            req.body,
-            { new: true, runValidators: true }
-        );
 
-        if (!updatedCourse) {
-            return res.status(404).json({ message: "Course not found" });
-        }
-        res.status(200).json(updatedCourse);
-    } catch (err) {
-        console.error("Error updating course:", err);
-        res.status(500).json({ message: "Error updating course", error: (err as Error).message });
-    }
-});
+
 
 // 5. Delete Course by courseId
 router.delete("/courseId/:courseId", async (req: Request, res: Response): Promise<any> => {
     try {
-        const deletedCourse = await Course.findOneAndDelete({ courseId: req.params.courseId });
+        // Use findByIdAndDelete to search by _id
+        const deletedCourse = await Course.findByIdAndDelete(req.params.courseId);
+
         if (!deletedCourse) {
             return res.status(404).json({ message: "Course not found" });
         }
+
         res.status(200).json({ message: "Course deleted successfully" });
     } catch (err) {
         console.error("Error deleting course:", err);
         res.status(500).json({ message: "Error deleting course", error: (err as Error).message });
     }
 });
+
 
 // Search Courses
 router.get("/search", async (req: Request, res: Response): Promise<any> => {
@@ -150,5 +142,7 @@ router.get("/enrolled/:userId", async (req: Request, res: Response): Promise<any
         res.status(500).json({ message: "Error fetching enrolled courses", error: (err as Error).message });
     }
 });
+router.post('/create', createCourse);
+router.put("/:courseid",updateCourse);
 
 export default router;

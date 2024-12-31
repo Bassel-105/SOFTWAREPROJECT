@@ -5,7 +5,11 @@ import {
     getEnrolledCourses,
     completeCourse,
     getUserProgress,
+    getAllUsers,
+    deleteUser,
+  
 } from "../Controllers/userController";
+import { getInstructorAnalytics, getStudentDashboard } from "../Controllers/studentController";
 
 const router: Router = Router();
 
@@ -33,5 +37,12 @@ router.post("/complete-course", async (req: Request, res: Response): Promise<any
 router.get("/progress", async (req: Request, res: Response): Promise<any> => {
     return getUserProgress(req, res);
 });
+
+router.get("/dashboard/:userId", getStudentDashboard);
+
+router.get("/student-dashboard/:userId",getStudentDashboard);
+router.get("/instructor-dashboard/:userId",getInstructorAnalytics);
+router.get("/users", getAllUsers);
+router.delete("/users/:id", deleteUser);
 
 export default router;

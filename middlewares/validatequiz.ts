@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import Joi from 'joi';
 
-const validateQuiz = (req: Request, res: Response, next: NextFunction): void => {
+const validateQuiz = (req: Request, res: Response, next: NextFunction): any => {
     const schema = Joi.object({
         quizId: Joi.string().required(),
         moduleId: Joi.string().required(),

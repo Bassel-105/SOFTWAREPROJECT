@@ -7,6 +7,5 @@ import courseRoutes from './courseRoutes';
 export default (app: Express): void => {
     app.use('/auth', authRoutes);
     app.use('/courses', courseRoutes);
-   // app.use('/quizzes', quizRoutes);
-   // app.use('/modules', moduleRoutes);
+    
 };

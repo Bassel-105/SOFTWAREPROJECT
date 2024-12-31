@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import Reply from '../SOFTWAREPROJECT/models/reply'; // Ensure the path is correct
+import User from '../SOFTWAREPROJECT/models/User'; // Assuming you have a User model
 
 // Create a reply for a thread
 export const createReply = async (req: Request, res: Response): Promise<void> => {
@@ -14,6 +15,13 @@ export const createReply = async (req: Request, res: Response): Promise<void> =>
     }
 
     try {
+        // Check if the user exists in the database
+        const user = await User.findById(userId);
+        if (!user) {
+            res.status(404).json({ error: 'User not found' });
+            return;
+        }
+
         // Create and save the new reply
         const reply = new Reply({ threadId, userId, content, creator: userId });
         await reply.save();

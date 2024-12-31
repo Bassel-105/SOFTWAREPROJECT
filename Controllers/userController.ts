@@ -54,12 +54,12 @@ export const updateUserProfile = async (req: Request, res: Response) => {
 
     try {
         const user = await User.findOneAndUpdate(
-            { userId },
+            { _id:userId },
             { name, email, profilePictureUrl },
             { new: true }
         );
 
-        if (!user) {
+        if (!userId) {
             return res.status(404).json({ message: "User not found" });
         }
 
@@ -127,4 +127,33 @@ export const getUserProgress = async (req: Request, res: Response) => {
         res.status(500).json({ message: "Error fetching user progress", error });
     }
 };
+
+
+// Fetch all users
+export const getAllUsers = async (req: Request, res: Response): Promise<any> => {
+    try {
+        const users = await User.find().select("-password"); // Exclude the password field for security
+        res.status(200).json(users);
+    } catch (error) {
+        console.error("Error fetching users:", error);
+        res.status(500).json({ message: "Error fetching users", error: (error as Error).message });
+    }
+};
+export const deleteUser = async (req: Request, res: Response): Promise<any> => {
+    const { id } = req.params; // Assuming the parameter is named 'id'
+
+    try {
+        // Find and delete the user by Mongoose ObjectId
+        const user = await User.findByIdAndDelete(id);
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.status(200).json({ message: "User deleted successfully" });
+    } catch (error) {
+        res.status(500).json({ message: "Error deleting user", error });
+    }
+};
+
 
